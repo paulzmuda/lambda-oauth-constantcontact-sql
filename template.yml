@@ -1,0 +1,125 @@
+# This is the SAM template that represents the architecture of your serverless application
+# https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-template-basics.html
+
+# The AWSTemplateFormatVersion identifies the capabilities of the template
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/format-version-structure.html
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  lambda-contacts
+
+# Transform section specifies one or more macros that AWS CloudFormation uses to process your template
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/transform-section-structure.html
+Transform:
+- AWS::Serverless-2016-10-31
+
+# Resources declares the AWS resources that you want to include in the stack
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
+Resources:
+  # Each Lambda function is defined by properties:
+  # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+
+  ExpressApi:
+    Type: AWS::Serverless:Api
+    Properties:
+      StageName: prod
+      BinaryMediaTypes: ['*/*']
+
+  getNewRefreshToken:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/api/constant-contact/authClientServer/server.handler
+      Runtime: nodejs14.x
+      MemorySize: 128
+      Timeout: 100
+      Description: Insert new contact to Constant Contact API V3.
+      Environment:
+        Variables:
+          AWS_PROFILE:
+          AWS_REGION:
+          AWS_SECRET_ID:
+          CC_API_KEY:
+          CC_API_SECRET:
+          CC_API_SCOPE:
+      Events:
+        ProxyApiRoot:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExpressApi
+            Path: /
+            Method: ANY
+        ProxyApiGreedy:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExpressApi
+            Path: /{proxy+}
+            Method: ANY
+
+  putNewSQLContactFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/put-new-sql-contact.putNewSQLContactHandler
+      Runtime: nodejs14.x
+      MemorySize: 128
+      Timeout: 100
+      Description: Insert new contact to Azure, MS SQL.
+      Environment:
+        Variables:
+          AWS_PROFILE:
+          AWS_REGION:
+          AWS_SECRET_ID:
+
+  putNewCCContactFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/put-new-cc-contact.putNewCCContactHandler
+      Runtime: nodejs14.x
+      MemorySize: 128
+      Timeout: 100
+      Description: Insert new contact to Constant Contact API V3.
+      Environment:
+        Variables:
+          AWS_PROFILE:
+          AWS_REGION:
+          AWS_SECRET_ID:
+          CC_API_KEY:
+          CC_API_SECRET:
+          CC_API_SCOPE:
+
+  getContactListCollectionFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: src/handlers/get-contact-list-collection.getContactListCollectionHandler
+        Runtime: nodejs14.x
+        MemorySize: 128
+        Timeout: 100
+        Description: Cross reference contact list V2 ID's with V3 IDs.
+        Environment:
+          Variables:
+            AWS_PROFILE:
+            AWS_REGION:
+            AWS_SECRET_ID:
+            CC_API_KEY:
+            CC_API_SECRET:
+            CC_API_SCOPE:
+
+  getCustomFieldsListFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/get-custom-fields-list.getCustomFieldsHandler
+      Runtime: nodejs14.x
+      MemorySize: 128
+      Timeout: 100
+      Description: Get list of custom fields from Constant Contact.
+      Environment:
+        Variables:
+          AWS_PROFILE:
+          AWS_REGION:
+          AWS_SECRET_ID:
+          CC_API_KEY:
+          CC_API_SECRET:
+          CC_API_SCOPE:
+
+Outputs:
+  WebEndpoint:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"

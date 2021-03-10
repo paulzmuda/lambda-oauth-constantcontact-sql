@@ -1,0 +1,7 @@
+{
+    "method": "GET",
+    "path": "/contact_lists/list_id_xrefs",
+    "getParams": {
+        "sequence_ids": "12345"
+    }
+}
