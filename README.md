@@ -44,10 +44,10 @@ Test a single function by invoking it directly with a test event. An event is a 
 Run functions locally and invoke them with the `sam local invoke` command.
 
 ```bash
-user$ sam local invoke putNewSQLContactFunction --profile ecunited
-user$ sam local invoke putNewCCContactFunction --event events/event-put-new-cc-contact.json --profile ecunited
-user$ sam local invoke getContactListCollectionFunction --event events/event-get-contact-list-collection.json --profile ecunited
-user$ sam local invoke getCustomFieldsListFunction --event events/event-get-custom-fields-list.json --profile ecunited
+user$ sam local invoke putNewSQLContactFunction --profile [aws profile name you created with your aws-cli]
+user$ sam local invoke putNewCCContactFunction --event events/event-put-new-cc-contact.json --profile [aws profile created with aws-cli]
+user$ sam local invoke getContactListCollectionFunction --event events/event-get-contact-list-collection.json --profile [aws profile created with aws-cli]
+user$ sam local invoke getCustomFieldsListFunction --event events/event-get-custom-fields-list.json --profile [aws profile created with aws-cli]
 ```
 
 Use the `sam local start-api` command to run the API locally on port 3000. This is used to Authorize your App with Constant Contact for the first time.
